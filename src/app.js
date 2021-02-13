@@ -73,8 +73,7 @@ if (config.env === 'production' || process.env.NODE_ENV === 'staging') {
 }
 app.use('/v1', routes);
 
-app.use(express.static(path.join(__dirname, 'client/build')));
-
+app.use(express.static(path.join(__dirname, '../client/build')));
 app.get('*', function (req, res) {
   res.sendFile(path.join(__dirname, '../client/build', 'index.html'));
 });
