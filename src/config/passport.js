@@ -1,13 +1,18 @@
-const { Strategy: JwtStrategy, ExtractJwt } = require('passport-jwt');
+const { Strategy: JwtStrategy } = require('passport-jwt');
 const TwitterTokenStrategy = require('passport-twitter-token');
 
 const config = require('./config');
 const { User } = require('../models');
 const { tokenTypes } = require('./tokens');
 
+const cookieExtractor = (req) => {
+  let token = null;
+  if (req && req.cookies) token = req.cookies['jwt'];
+  return token;
+};
 const jwtOptions = {
   secretOrKey: config.jwt.secret,
-  jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
+  jwtFromRequest: cookieExtractor,
 };
 
 const jwtVerify = async (payload, done) => {
@@ -40,4 +45,4 @@ const twitterStrategy = new TwitterTokenStrategy(
   }
 );
 
-module.exports = { jwtStrategy, twitterStrategy };
+module.exports = { jwtStrategy, twitterStrategy, jwtVerify };

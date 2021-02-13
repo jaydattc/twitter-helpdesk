@@ -6,14 +6,20 @@ import store from "./app/store";
 import { Provider } from "react-redux";
 import * as serviceWorker from "./serviceWorker";
 import { ChakraProvider } from "@chakra-ui/react";
+import { AlertProvider } from "useAlerts";
+import { BrowserRouter as Router } from "react-router-dom";
 
 ReactDOM.render(
   <React.StrictMode>
-    <Provider store={store}>
-      <ChakraProvider>
-        <App />
-      </ChakraProvider>
-    </Provider>
+    <Router>
+      <Provider store={store}>
+        <ChakraProvider>
+          <AlertProvider>
+            <App />
+          </AlertProvider>
+        </ChakraProvider>
+      </Provider>{" "}
+    </Router>
   </React.StrictMode>,
   document.getElementById("root")
 );

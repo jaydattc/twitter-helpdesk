@@ -17,13 +17,19 @@ const login = {
 };
 
 const logout = {
-  body: Joi.object().keys({
+  cookies: Joi.object().keys({
     refreshToken: Joi.string().required(),
   }),
 };
 
+const check = {
+  cookies: Joi.object().keys({
+    jwt: Joi.string().required(),
+  }),
+};
+
 const refreshTokens = {
-  body: Joi.object().keys({
+  cookies: Joi.object().keys({
     refreshToken: Joi.string().required(),
   }),
 };
@@ -43,11 +49,19 @@ const resetPassword = {
   }),
 };
 
+const loginWithGoogle = {
+  body: Joi.object().keys({
+    idToken: Joi.string().required(),
+  }),
+};
+
 module.exports = {
   register,
   login,
   logout,
   refreshTokens,
+  check,
   forgotPassword,
   resetPassword,
+  loginWithGoogle,
 };

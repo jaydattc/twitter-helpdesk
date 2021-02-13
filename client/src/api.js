@@ -1,5 +1,6 @@
 import axios from "axios";
 import { BACKEND_URI } from "config";
+import { ValidationErrorDescription } from "useAlerts";
 
 const api = (
   options = {
@@ -11,6 +12,7 @@ const api = (
   const axiosInstance = axios.create({
     baseURL: BACKEND_URI,
     cancelToken,
+    withCredentials: true,
   });
   if (!isHandlerDisabled)
     axiosInstance.interceptors.response.use(
@@ -22,9 +24,11 @@ const api = (
             // auto logout if 401 response returned from api
             // clear localstorage or a logout method
             localStorage.clear();
-            window.location && window.location.replace("/");
+            if (window.location.pathname !== "/") window.location.replace("/");
           } else if (response.status === 400) {
-            let description = response.data;
+            let description = (
+              <ValidationErrorDescription errors={response.data} />
+            );
             return Promise.reject({ ...error, description });
           }
           const description =

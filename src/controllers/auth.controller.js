@@ -8,6 +8,8 @@ const Oauth1Helper = require('../utils/Oauth1Helper');
 const config = require('../config/config');
 const { default: convertToJson } = require('../utils/convertToJson');
 const ApiError = require('../utils/ApiError');
+const twitterService = require('../services/twitter.service');
+const pick = require('../utils/pick');
 
 const register = catchAsync(async (req, res) => {
   const user = await userService.createUser({ ...req.body, authType: 'credentials' });
@@ -34,8 +36,20 @@ const logout = catchAsync(async (req, res) => {
 const check = catchAsync(async (req, res) => {
   try {
     const user = await userService.getUserById(req.user._id);
-    res.send({ user });
+    const { data } = await twitterService(user.tokens.accessToken, user.tokens.tokenSecret).getCurrentUser();
+    if (!data) throw new ApiError(httpStatus.BAD_REQUEST, 'Error while fetching the user details!');
+    const userDetails = pick(data, [
+      'name',
+      'location',
+      'description',
+      'screen_name',
+      'followers_count',
+      'profile_image_url',
+    ]);
+    // convert mongodb object to js object
+    return res.send({ user: { ...JSON.parse(JSON.stringify(user)), ...userDetails } });
   } catch (e) {
+    console.log(e);
     throw new ApiError(httpStatus.UNAUTHORIZED, 'Invalid credentials');
   }
 });
@@ -64,6 +78,7 @@ const getTwitterAccessToken = catchAsync(async (req, res, next) => {
     req.body = { ...req.body, ...parsedBody };
     next();
   } catch (e) {
+    console.log(e);
     throw new ApiError(httpStatus.INTERNAL_SERVER_ERROR, 'Error while fetching token!');
   }
 });
@@ -71,7 +86,8 @@ const getTwitterAccessToken = catchAsync(async (req, res, next) => {
 const generateTokens = catchAsync(async (req, res) => {
   const tokens = await tokenService.generateAuthTokens(req.user);
   applyCookies(res, buildTokenCookie('jwt', tokens.access.token), buildTokenCookie('refreshToken', tokens.refresh.token));
-  res.redirect(config.base_url);
+  if (process.env.NODE_ENV === 'development') res.redirect('http://localhost:3000/d');
+  else res.redirect(config.base_url);
 });
 
 const getTwitterRequestToken = catchAsync(async (req, res) => {

@@ -1,12 +1,24 @@
 const mongoose = require('mongoose');
+const httpServer = require('http').createServer;
+const socketIo = require('socket.io');
 const app = require('./app');
 const config = require('./config/config');
 const logger = require('./config/logger');
+const socketHandler = require('./services/socket.service');
 
-let server;
+const server = httpServer(app);
 mongoose.connect(config.mongoose.url, config.mongoose.options).then(() => {
   logger.info('Connected to MongoDB');
-  server = app.listen(config.port, () => {
+
+  const options = {
+    cors: {
+      origin: process.env.NODE_ENV === 'production' ? 'https://twitter-rp.herokuapp.com' : 'http://localhost:3000',
+      credentials: true,
+    },
+  };
+  socketHandler(socketIo(server, options));
+
+  server.listen(config.port, () => {
     logger.info(`Listening to port ${config.port}`);
   });
 });

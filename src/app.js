@@ -1,10 +1,12 @@
 const express = require('express');
 const helmet = require('helmet');
+const path = require('path');
 const xss = require('xss-clean');
 const mongoSanitize = require('express-mongo-sanitize');
 const compression = require('compression');
 const cors = require('cors');
 const passport = require('passport');
+const cookieParser = require('cookie-parser');
 const httpStatus = require('http-status');
 const config = require('./config/config');
 const morgan = require('./config/morgan');
@@ -20,6 +22,9 @@ if (config.env !== 'test') {
   app.use(morgan.successHandler);
   app.use(morgan.errorHandler);
 }
+
+// parse cookies to req.cookies
+app.use(cookieParser());
 
 // set security HTTP headers
 app.use(helmet());
@@ -38,21 +43,43 @@ app.use(mongoSanitize());
 app.use(compression());
 
 // enable cors
-app.use(cors());
-app.options('*', cors());
+const whitelist = ['http://localhost:3000', 'https://twitter-rp.herokuapp.com'];
+const corsOptions = {
+  credentials: true,
+  origin: (origin, callback) => {
+    if (!origin || whitelist.indexOf(origin) !== -1) {
+      callback(null, true);
+    } else {
+      callback(new Error('Not allowed by CORS'));
+    }
+  },
+};
+app.use(cors(corsOptions));
 
 // jwt authentication
 app.use(passport.initialize());
+passport.serializeUser(function (user, done) {
+  done(null, user);
+});
+passport.deserializeUser(function (user, done) {
+  done(null, user);
+});
 passport.use('jwt', jwtStrategy);
 passport.use('twitter', twitterStrategy);
 
 // limit repeated failed requests to auth endpoints
-if (config.env === 'production') {
+if (config.env === 'production' || process.env.NODE_ENV === 'staging') {
   app.use('/v1/auth', authLimiter);
 }
+app.use('/v1', routes);
+
+app.use(express.static(path.join(__dirname, 'client/build')));
+
+app.get('*', function (req, res) {
+  res.sendFile(path.join(__dirname, '../client/build', 'index.html'));
+});
 
 // v1 api routes
-app.use('/v1', routes);
 
 // send back a 404 error for any unknown api request
 app.use((req, res, next) => {

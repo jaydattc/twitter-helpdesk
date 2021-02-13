@@ -43,8 +43,8 @@ const userSchema = mongoose.Schema(
       default: 'organisation-member',
     },
     tokens: {
-      accessToken: String,
-      tokenSecret: String,
+      accessToken: { type: String, private: true },
+      tokenSecret: { type: String, private: true },
     },
     twitter: {
       id: String,
@@ -84,7 +84,6 @@ userSchema.statics.upsertTwitterUser = async function (token, tokenSecret, profi
   const user = await this.findOne({
     'twitter.id': profile.id_str,
   });
-  console.log(user);
   // no user was found, lets create a new one
   if (!user) {
     const newUser = new this({
@@ -98,7 +97,6 @@ userSchema.statics.upsertTwitterUser = async function (token, tokenSecret, profi
     });
     newUser.save(function (error, savedUser) {
       if (error) {
-        console.log(error);
         throw new ApiError(httpStatus.INTERNAL_SERVER_ERROR, 'Error while saving details!');
       }
       return cb(error, savedUser);
