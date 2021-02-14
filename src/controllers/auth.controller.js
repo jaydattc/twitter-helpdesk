@@ -35,7 +35,7 @@ const logout = catchAsync(async (req, res) => {
 
 const check = catchAsync(async (req, res) => {
   try {
-    const user = await userService.getUserById(req.user._id);
+    const { user } = req;
     const { data } = await twitterService(user.tokens.accessToken, user.tokens.tokenSecret).getCurrentUser();
     if (!data) throw new ApiError(httpStatus.BAD_REQUEST, 'Error while fetching the user details!');
     const userDetails = pick(data, [
@@ -86,7 +86,7 @@ const getTwitterAccessToken = catchAsync(async (req, res, next) => {
 const generateTokens = catchAsync(async (req, res) => {
   const tokens = await tokenService.generateAuthTokens(req.user);
   applyCookies(res, buildTokenCookie('jwt', tokens.access.token), buildTokenCookie('refreshToken', tokens.refresh.token));
-  if (process.env.NODE_ENV === 'development') res.redirect('http://localhost:3000/d');
+  if (process.env.NODE_ENV === 'development') res.redirect('/d');
   else res.redirect(config.base_url);
 });
 

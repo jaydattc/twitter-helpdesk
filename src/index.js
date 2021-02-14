@@ -6,15 +6,14 @@ const config = require('./config/config');
 const logger = require('./config/logger');
 const socketHandler = require('./services/socket.service');
 
-const server = httpServer(app);
+let server;
 mongoose.connect(config.mongoose.url, config.mongoose.options).then(() => {
   logger.info('Connected to MongoDB');
-
+  server = httpServer(app);
   const options = {
-    cors: {
-      origin: process.env.NODE_ENV === 'production' ? 'https://twitter-rp.herokuapp.com' : 'http://localhost:3000',
-      credentials: true,
-    },
+    cors: true,
+    origins: ['http://localhost:3000', 'http://localhost:8080', 'https://twitter-rp.herokuapp.com'],
+    credentials: true,
   };
   socketHandler(socketIo(server, options));
 

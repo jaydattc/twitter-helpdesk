@@ -8,6 +8,7 @@ const cors = require('cors');
 const passport = require('passport');
 const cookieParser = require('cookie-parser');
 const httpStatus = require('http-status');
+const { expressCspHeader, INLINE, SELF } = require('express-csp-header');
 const config = require('./config/config');
 const morgan = require('./config/morgan');
 const { jwtStrategy, twitterStrategy } = require('./config/passport');
@@ -39,11 +40,24 @@ app.use(express.urlencoded({ extended: true }));
 app.use(xss());
 app.use(mongoSanitize());
 
+// content security policy middleware
+app.use(
+  expressCspHeader({
+    directives: {
+      'default-src': [SELF, '*.twimg.com'],
+      'script-src': [SELF, INLINE],
+      'style-src': [SELF, INLINE],
+      'img-src': [SELF, 'data:', '*.twimg.com'],
+      'font-src': [SELF, 'fonts.gstatic.com'],
+    },
+  })
+);
+
 // gzip compression
 app.use(compression());
 
 // enable cors
-const whitelist = ['http://localhost:3000', 'https://twitter-rp.herokuapp.com'];
+const whitelist = ['http://localhost:3000', 'http://localhost:8080', 'https://twitter-rp.herokuapp.com'];
 const corsOptions = {
   credentials: true,
   origin: (origin, callback) => {
