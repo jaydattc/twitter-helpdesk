@@ -57,7 +57,7 @@ app.use(
 app.use(compression());
 
 // enable cors
-const whitelist = ['http://localhost:3000', 'http://localhost:8080', 'https://twitter-rp.herokuapp.com'];
+const whitelist = ['http://localhost:3000', 'http://localhost:8080', 'https://rp-helpdesk.herokuapp.com'];
 const corsOptions = {
   credentials: true,
   origin: (origin, callback) => {
