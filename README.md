@@ -29,5 +29,5 @@ npm run dev
 ## Features
 
 - Login with twitter API
-- Pesist tweets in the database
+- Persist tweets in the database
 - Get mentioned tweets and replies in realtime
