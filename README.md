@@ -3,7 +3,7 @@
 Initially made as an assessment test for [Richpanel](https://richpanel.com/), this project is an twitter helpdesk which allows multiple users to login via twitter account and view the tweets which have mentioned them.
 It uses sockets for realtime synchronisation of new mentioned tweets and replies with the twitter webhooks and streams.
 
-> Deployed at [https://rp-helpdesk.herokuapp.com/](https://rp-helpdesk.herokuapp.com/)
+> ~~Deployed at [https://rp-helpdesk.herokuapp.com/](https://rp-helpdesk.herokuapp.com/)~~
  
 ## Run locally
 
